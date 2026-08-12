@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eden Air — Análisis de costos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F1E16; --panel:#16281E; --panel2:#1B3225; --line:#2A4534;
+    --text:#E4EFE6; --muted:#93AC9B; --mint:#7ED3A8; --mint2:#B8E6CE;
+    --lime:#D7EE7B; --grey:#7E9789;
+    --serif:'Instrument Serif',Georgia,serif;
+    --sans:'DM Sans',Verdana,sans-serif;
+    --mono:'JetBrains Mono','Courier New',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+       font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:28px 18px 60px}
+  h2{font-family:var(--serif);font-size:34px;font-weight:400;margin:0 0 4px;letter-spacing:-.01em}
+  h2 em{font-style:italic;color:var(--mint2)}
+  .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .sub{color:var(--muted);max-width:66ch;margin:0 0 18px}
+  .mono{font-family:var(--mono)}
+  section{margin-top:52px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .panel + .panel{margin-top:14px}
+
+  /* HERO */
+  .hero-top{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+  .numeral{font-family:var(--serif);font-size:74px;line-height:.8;color:var(--mint);opacity:.55}
+  .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 14px;
+        font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:14px}
+  .pill i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--lime);margin-right:8px}
+  .hero-title{flex:1;min-width:280px}
+  .hero-title h1{font-family:var(--serif);font-size:44px;font-weight:400;margin:0 0 6px;letter-spacing:-.02em}
+  .hero-title h1 em{font-style:italic;color:var(--mint2)}
+  .hero-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:26px;align-items:center}
+  .price{font-family:var(--serif);font-size:66px;line-height:1;margin:10px 0 12px}
+  .alloc{display:flex;height:26px;border-radius:8px;overflow:hidden;margin-bottom:16px}
+  .alloc div{height:100%}
+  .alloc-legend{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}
+  .al{display:flex;align-items:flex-start;gap:9px;font-size:13px}
+  .al b{display:block;font-family:var(--mono);font-size:14px;color:var(--text)}
+  .al span.sw{width:9px;height:9px;border-radius:2px;margin-top:6px;flex:none}
+  .al small{color:var(--muted);font-family:var(--mono)}
+
+  /* CALCULADORA */
+  .calc{display:grid;grid-template-columns:270px 1fr;gap:18px}
+  .slider{margin-bottom:16px}
+  .slider .row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+  .slider .row b{font-family:var(--mono);color:var(--mint2)}
+  input[type=range]{width:100%;accent-color:#7ED3A8;background:transparent}
+  .btn{background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:8px;
+       padding:8px 14px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+  .btn:hover{color:var(--text);border-color:var(--mint)}
+  .outs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+  .out{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+  .out .v{font-family:var(--mono);font-size:20px;font-weight:700;margin-top:6px}
+  .out small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+  .out.hl{border-color:var(--mint);background:#1D3728}
+  .chartbox{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px}
+  svg{width:100%;height:auto;display:block}
+
+  /* INSUMOS */
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 18px}
+  .tab{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 14px;
+       font-size:13px;color:var(--muted);cursor:pointer}
+  .tab b{font-family:var(--mono);font-size:11px;margin-left:7px;color:var(--mint)}
+  .tab.on{color:var(--text);border-color:var(--mint);background:#1D3728}
+  .items{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:10px}
+  .item{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px;display:flex;gap:10px}
+  .qty{font-family:var(--mono);font-size:12px;background:var(--panel2);border:1px solid var(--line);
+       border-radius:6px;min-width:26px;height:24px;display:flex;align-items:center;justify-content:center;flex:none}
+  .item p{margin:0;font-size:13.5px;line-height:1.4}
+  .item .cat{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+
+  /* FIJOS */
+  .fx{display:grid;grid-template-columns:200px 1fr 90px;gap:10px;align-items:center;margin-bottom:9px;font-size:13.5px}
+  .fxbar{height:11px;border-radius:6px;background:linear-gradient(90deg,#7ED3A8,#B8E6CE)}
+  .fx .amt{font-family:var(--mono);text-align:right;color:var(--mint2)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:30px}
+  .stat .big{font-family:var(--serif);font-size:42px;color:var(--mint2);line-height:1}
+  .stat p{color:var(--muted);font-size:13.5px;margin:8px 0 0}
+
+  /* TABLAS */
+  details{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 22px;margin-top:20px}
+  summary{cursor:pointer;list-style:none;font-family:var(--serif);font-size:24px}
+  summary::-webkit-details-marker{display:none}
+  summary small{display:block;font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:2px}
+  table{width:100%;border-collapse:collapse;margin:12px 0 4px;font-size:13.5px}
+  caption{text-align:left;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+          color:var(--muted);padding:12px 0 6px;font-style:normal}
+  th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+     color:var(--muted);font-weight:400;border-bottom:1px solid var(--line);padding:8px 6px}
+  td{border-bottom:1px solid rgba(42,69,52,.6);padding:9px 6px}
+  td.n,th.n{text-align:right;font-family:var(--mono)}
+  tr.tot td{font-weight:700;color:var(--mint2);border-bottom:none}
+  .foot{color:var(--muted);font-size:12.5px;margin-top:10px}
+  @media (max-width:760px){
+    .hero-grid,.calc,.two{grid-template-columns:1fr}
+    .stats{grid-template-columns:1fr;gap:18px}
+    .fx{grid-template-columns:130px 1fr 78px}
+    .alloc-legend{grid-template-columns:1fr}
+    .hero-title h1{font-size:34px}.price{font-size:50px}h2{font-size:27px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== HERO ===== -->
+  <div class="hero-top">
+    <div>
+      <div class="numeral">07</div>
+      <div class="pill"><i></i>TP Nº 5 · Emprendimientos</div>
+    </div>
+    <div class="hero-title">
+      <h1>Análisis de <em>costos.</em></h1>
+      <p class="sub">Qué cuesta fabricar Eden Air, a cuánto se vende y desde qué unidad empieza a dar ganancia.</p>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:18px">
+    <div class="hero-grid">
+      <div>
+        <div class="pill" style="margin:0"><i></i>Precio de venta</div>
+        <div class="price">$450.000</div>
+        <p class="sub" style="margin:0">Por equipo, pago único, con la plataforma web incluida. Cubre <b>$303.333,33</b> de costo y deja <b>$146.666,67</b> de ganancia.</p>
+      </div>
+      <div>
+        <div class="lbl" style="margin-bottom:10px">A dónde va cada peso que paga el cliente</div>
+        <div class="alloc">
+          <div style="width:48.9%;background:#4FB98A"></div>
+          <div style="width:8.9%;background:#8FD9B6"></div>
+          <div style="width:9.6%;background:#6E8C7C"></div>
+          <div style="width:32.6%;background:#D7EE7B"></div>
+        </div>
+        <div class="alloc-legend">
+          <div class="al"><span class="sw" style="background:#4FB98A"></span><span>Materia prima<b>$220.000</b><small>48,9 %</small></span></div>
+          <div class="al"><span class="sw" style="background:#8FD9B6"></span><span>Mano de obra<b>$40.000</b><small>8,9 %</small></span></div>
+          <div class="al"><span class="sw" style="background:#6E8C7C"></span><span>Costos fijos<b>$43.333,33</b><small>9,6 %</small></span></div>
+          <div class="al"><span class="sw" style="background:#D7EE7B"></span><span>Ganancia<b>$146.666,67</b><small>32,6 %</small></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CALCULADORA ===== -->
+  <section>
+    <div class="panel">
+      <h2>Probá <em>vos.</em></h2>
+      <p class="sub">Movés un valor y se recalculan el costo, la ganancia y el punto de equilibrio.</p>
+      <button class="btn" id="reset">Volver a los valores del TP</button>
+      <div class="calc" style="margin-top:18px">
+        <div>
+          <div class="slider"><div class="row"><span>Unidades por mes</span><b id="l1">15 u</b></div>
+            <input type="range" id="s1" min="1" max="40" step="1" value="15"></div>
+          <div class="slider"><div class="row"><span>Horas por unidad</span><b id="l2">8 h</b></div>
+            <input type="range" id="s2" min="1" max="20" step="1" value="8"></div>
+          <div class="slider"><div class="row"><span>Valor de la hora</span><b id="l3">$5.000</b></div>
+            <input type="range" id="s3" min="1000" max="15000" step="500" value="5000"></div>
+          <div class="slider"><div class="row"><span>Materiales por equipo</span><b id="l4">$220.000</b></div>
+            <input type="range" id="s4" min="50000" max="500000" step="5000" value="220000"></div>
+          <div class="slider"><div class="row"><span>Precio de venta</span><b id="l5">$450.000</b></div>
+            <input type="range" id="s5" min="150000" max="900000" step="10000" value="450000"></div>
+          <p class="foot">Los costos fijos quedan en $650.000 por mes.</p>
+        </div>
+        <div>
+          <div class="outs">
+            <div class="out"><div class="lbl">Costo por unidad</div><div class="v" id="o1"></div></div>
+            <div class="out hl"><div class="lbl">Ganancia por unidad</div><div class="v" id="o2"></div><small id="o2b"></small></div>
+            <div class="out"><div class="lbl">Punto de equilibrio</div><div class="v" id="o3"></div><small id="o3b"></small></div>
+            <div class="out"><div class="lbl">Utilidad del mes</div><div class="v" id="o4"></div><small>Si se vende toda la producción</small></div>
+          </div>
+          <div class="chartbox">
+            <div class="lbl" style="margin-bottom:8px">Ingresos contra costos, según las unidades vendidas en el mes</div>
+            <svg id="chart" viewBox="0 0 620 280" role="img" aria-label="Gráfico de ingresos contra costos totales"></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== INSUMOS ===== -->
+  <section>
+    <h2>De qué está <em>hecho.</em></h2>
+    <p class="sub">29 insumos por equipo, $220.000 en materiales.</p>
+    <div class="tabs" id="tabs"></div>
+    <div class="items" id="items"></div>
+  </section>
+
+  <!-- ===== COSTOS FIJOS + MÉTODOS ===== -->
+  <section>
+    <h2>Lo que se paga <em>igual.</em></h2>
+    <p class="sub">$650.000 por mes, se fabrique una unidad o veinte. No hay alquiler: se trabaja en un espacio propio.</p>
+    <div id="fijos"></div>
+
+    <div class="two">
+      <div class="panel">
+        <h3 style="font-family:var(--serif);font-size:22px;font-weight:400;margin:0 0 6px">Según la competencia</h3>
+        <p class="sub" style="margin-bottom:16px">El cliente compara antes de comprar. Eden Air queda arriba de los equipos que solo miden y abajo de los importados de gama alta.</p>
+        <div style="display:flex;gap:26px">
+          <div><div class="lbl">Promedio de mercado</div><div class="mono" style="font-size:17px;margin-top:4px">USD 291</div></div>
+          <div><div class="lbl">Equipos comparados</div><div class="mono" style="font-size:17px;margin-top:4px">4</div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3 style="font-family:var(--serif);font-size:22px;font-weight:400;margin:0 0 6px">Según el valor percibido</h3>
+        <p class="sub" style="margin-bottom:16px">Eden Air no solo mide: ventila, humidifica y comanda el aire acondicionado, con plataforma web sin abono mensual.</p>
+        <div style="display:flex;gap:26px">
+          <div><div class="lbl">Margen sobre el costo</div><div class="mono" style="font-size:17px;margin-top:4px">48,35 %</div></div>
+          <div><div class="lbl">Margen sobre la venta</div><div class="mono" style="font-size:17px;margin-top:4px">32,59 %</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="big">73 %</div><p>del costo unitario son componentes importados. Ahí está el riesgo y también el margen de mejora.</p></div>
+      <div class="stat"><div class="big">4</div><p>unidades de 15 alcanzan para cubrir todos los costos del mes. El proyecto aguanta una demanda inicial baja.</p></div>
+      <div class="stat"><div class="big">$190.000</div><p>aporta cada equipo vendido a partir de ahí. Comprar por volumen y pasar a placa impresa sube ese número.</p></div>
+    </div>
+  </section>
+
+  <!-- ===== DESARROLLO COMPLETO ===== -->
+  <details>
+    <summary>Ver el desarrollo completo del trabajo práctico
+      <small>Supuestos, materia prima, mano de obra, costos unitarios y punto muerto</small></summary>
+
+    <div class="lbl" style="margin-top:22px">Supuestos de trabajo</div>
+    <p class="sub">15 unidades por mes, 8 horas de producción por unidad y la hora valorizada en $5.000. Produce el equipo de dos integrantes en un espacio propio, sin alquiler de taller. La modalidad es de pago único: el acceso a la plataforma web va incluido, sin suscripción.</p>
+
+    <div class="lbl" style="margin-top:24px">Tema 1 · Costos del producto</div>
+    <table>
+      <caption>a, b y c · Costo variable, costo fijo y costo total del mes</caption>
+      <tr><th>Concepto</th><th>Cálculo</th><th class="n">Importe</th></tr>
+      <tr><td>Materia prima directa</td><td>$220.000 × 15 unidades</td><td class="n">$3.300.000</td></tr>
+      <tr><td>Mano de obra directa</td><td>120 h × $5.000</td><td class="n">$600.000</td></tr>
+      <tr class="tot"><td>Costo variable total</td><td>$3.300.000 + $600.000</td><td class="n">$3.900.000</td></tr>
+      <tr><td>Costo fijo total mensual</td><td>Suma de los 6 conceptos fijos</td><td class="n">$650.000</td></tr>
+      <tr class="tot"><td>Costo total</td><td>$3.900.000 + $650.000</td><td class="n">$4.550.000</td></tr>
+    </table>
+    <table>
+      <caption>d · Costo unitario, por las dos vías vistas en clase</caption>
+      <tr><th>Vía</th><th>Cálculo</th><th class="n">Resultado</th></tr>
+      <tr><td>Costo total sobre unidades</td><td>$4.550.000 / 15</td><td class="n">$303.333,33</td></tr>
+      <tr><td>Costo variable unitario</td><td>$3.900.000 / 15</td><td class="n">$260.000</td></tr>
+      <tr><td>Costo fijo unitario</td><td>$650.000 / 15</td><td class="n">$43.333,33</td></tr>
+      <tr class="tot"><td>Costo total unitario</td><td>$260.000 + $43.333,33</td><td class="n">$303.333,33</td></tr>
+    </table>
+    <p class="foot">Las dos vías dan el mismo resultado, lo que verifica el cálculo. El costo variable pesa 85,7 % del costo unitario y el fijo 14,3 %.</p>
+
+    <div class="lbl" style="margin-top:28px">Tema 2 · Precio del producto</div>
+    <table>
+      <caption>a y b · Método 1, relevamiento de la competencia</caption>
+      <tr><th>Producto</th><th>Prestaciones</th><th class="n">Precio de referencia</th></tr>
+      <tr><td>Xiaomi Smart Air Purifier 4</td><td>Purifica, no mide CO₂</td><td class="n">USD 150 – 250</td></tr>
+      <tr><td>Dyson Purifier Cool</td><td>Purifica y mide gases</td><td class="n">USD 450 – 700</td></tr>
+      <tr><td>Netatmo Healthy Home Coach</td><td>Solo mide e informa</td><td class="n">USD 100 – 130</td></tr>
+      <tr><td>Airthings View Plus</td><td>Solo mide e informa</td><td class="n">USD 250 – 300</td></tr>
+      <tr class="tot"><td>Precio promedio de mercado</td><td>Valor medio de cada rango</td><td class="n">USD 291</td></tr>
+    </table>
+    <p class="foot">Precios de la competencia estimativos, en dólares, relevados en tiendas oficiales y de importación. Eden Air es local y en pesos, así que la comparación se hace por segmento y no por conversión directa. Este método siempre se verifica contra el costo unitario: por debajo de $303.333,33 se vendería a pérdida.</p>
+    <table>
+      <caption>b · Método 2, precio según el valor percibido</caption>
+      <tr><th>Concepto</th><th class="n">Importe</th></tr>
+      <tr><td>Costo total unitario</td><td class="n">$303.333,33</td></tr>
+      <tr><td>Ganancia por unidad</td><td class="n">$146.666,67</td></tr>
+      <tr><td>Margen sobre el costo</td><td class="n">48,35 %</td></tr>
+      <tr><td>Margen sobre el precio de venta</td><td class="n">32,59 %</td></tr>
+      <tr class="tot"><td>Precio de venta adoptado</td><td class="n">$450.000</td></tr>
+    </table>
+    <table>
+      <caption>c · Punto muerto = Costos fijos / (Precio de venta – Costo variable unitario)</caption>
+      <tr><th>Cálculo</th><th class="n">Resultado</th></tr>
+      <tr><td>Contribución marginal unitaria = $450.000 – $260.000</td><td class="n">$190.000</td></tr>
+      <tr><td>Punto muerto = $650.000 / $190.000</td><td class="n">3,42 unidades</td></tr>
+      <tr><td>Punto muerto en unidades enteras</td><td class="n">4 unidades</td></tr>
+      <tr class="tot"><td>Punto muerto en pesos = 4 × $450.000</td><td class="n">$1.800.000</td></tr>
+    </table>
+
+    <div class="lbl" style="margin-top:28px">Conclusión</div>
+    <p class="sub">El costo unitario es alto ($303.333,33) por el peso de los insumos electrónicos importados, cerca del 73 % del total. La mano de obra es el segundo componente y los costos fijos inciden poco, por trabajar en un espacio propio. Con un punto muerto de 4 unidades sobre 15, el proyecto es viable incluso con demanda inicial reducida. El riesgo principal es la variación del precio de los componentes importados, que golpea directo al costo variable. Las mejoras propuestas: comprar por volumen, reemplazar la protoboard y el cableado Dupont por una placa de circuito impreso propia, y producir un gabinete estandarizado. Todas bajan la materia prima y las horas de armado por unidad.</p>
+  </details>
+
+</div>
+
+<script>
+(function(){
+  var f = function(n, dec){ return '$' + n.toLocaleString('es-AR', {minimumFractionDigits: dec||0, maximumFractionDigits: dec||0}); };
+  var CF = 650000;
+  var DEF = {s1:15, s2:8, s3:5000, s4:220000, s5:450000};
+  var el = function(id){ return document.getElementById(id); };
+
+  /* ---------- INSUMOS ---------- */
+  var INS = [
+    [1,'Placa ESP32 DevKitC-32 (módulo ESP32-WROOM-32)','Cerebro y sensores'],
+    [1,'Sensor SCD41 de CO₂, temperatura y humedad','Cerebro y sensores'],
+    [1,'Módulo sensor MQ-135 de calidad de aire','Cerebro y sensores'],
+    [1,'Receptor infrarrojo VS1838B','Cerebro y sensores'],
+    [1,'Módulo relé optoacoplado de 2 canales, 5 V','Actuadores'],
+    [1,'Mini ventilador de 5 V','Actuadores'],
+    [1,'Módulo atomizador ultrasónico de 5 V con placa controladora','Actuadores'],
+    [1,'Emisor infrarrojo KY-005','Actuadores'],
+    [3,'LEDs de 5 mm (verde, rojo y azul)','Actuadores'],
+    [1,'Fuente switching regulada de 5 V y 3 A','Alimentación'],
+    [1,'Adaptador jack hembra 5,5 × 2,1 mm a bornera','Alimentación'],
+    [1,'Bloque distribuidor de alimentación de 2 polos','Alimentación'],
+    [1,'Interruptor SPST para 5 V y 3 A','Alimentación'],
+    [2,'Adaptadores USB-A hembra a bornera','Alimentación'],
+    [1,'Cable USB de datos para programar la ESP32','Alimentación'],
+    [1,'Cable USB para el atomizador (USB-A a USB-C)','Alimentación'],
+    [1,'Protoboard grande','Electrónica de soporte'],
+    [3,'Kits de cables Dupont','Electrónica de soporte'],
+    [3,'Resistencias de 220 Ω y 330 Ω para los LEDs','Electrónica de soporte'],
+    [1,'Resistencia de 20 kΩ del divisor del MQ-135','Electrónica de soporte'],
+    [1,'Resistencia de 10 kΩ del divisor del MQ-135','Electrónica de soporte'],
+    [1,'Transistor NPN BC337 o 2N2222','Electrónica de soporte'],
+    [1,'Resistencia de 1 kΩ para la base del transistor','Electrónica de soporte'],
+    [1,'Resistencia de 220 Ω del emisor infrarrojo','Electrónica de soporte'],
+    [1,'Base de MDF o acrílico','Montaje'],
+    ['–','Cable flexible rojo y negro','Montaje'],
+    ['–','Tubos termocontraíbles de varios diámetros','Montaje'],
+    ['–','Separadores, tornillos y tuercas','Montaje'],
+    ['–','Precintos y sujetacables','Montaje']
+  ];
+  var CATS = ['Cerebro y sensores','Actuadores','Alimentación','Electrónica de soporte','Montaje'];
+  var tabsHTML = '<button class="tab on" data-c="Todos">Todos<b>' + INS.length + '</b></button>';
+  CATS.forEach(function(c){
+    var n = INS.filter(function(i){ return i[2] === c; }).length;
+    tabsHTML += '<button class="tab" data-c="' + c + '">' + c + '<b>' + n + '</b></button>';
+  });
+  el('tabs').innerHTML = tabsHTML;
+
+  function paintItems(cat){
+    el('items').innerHTML = INS.filter(function(i){ return cat === 'Todos' || i[2] === cat; })
+      .map(function(i){
+        return '<div class="item"><span class="qty">' + i[0] + '</span><div><p>' + i[1] +
+               '</p><div class="cat">' + i[2] + '</div></div></div>';
+      }).join('');
+  }
+  paintItems('Todos');
+  el('tabs').addEventListener('click', function(e){
+    var b = e.target.closest('.tab'); if(!b) return;
+    [].forEach.call(document.querySelectorAll('.tab'), function(t){ t.classList.remove('on'); });
+    b.classList.add('on');
+    paintItems(b.dataset.c);
+  });
+
+  /* ---------- COSTOS FIJOS ---------- */
+  var FIJ = [
+    ['Sueldo administrativo (part time)', 400000],
+    ['Publicidad y gestión de redes', 80000],
+    ['Energía eléctrica', 60000],
+    ['Servicio de internet', 50000],
+    ['Amortización de herramientas', 35000],
+    ['Hosting y dominio del sistema web', 25000]
+  ];
+  el('fijos').innerHTML = FIJ.map(function(r){
+    return '<div class="fx"><span>' + r[0] + '</span><span class="fxbar" style="width:' +
+           (r[1] / 400000 * 100) + '%"></span><span class="amt">' + f(r[1]) + '</span></div>';
+  }).join('');
+
+  /* ---------- CALCULADORA ---------- */
+  function draw(u, cvu, precio, pe){
+    var maxX = u, maxY = Math.max(precio * u, CF + cvu * u) * 1.06;
+    var L = 62, R = 12, T = 12, B = 42, W = 620, H = 280;
+    var px = function(x){ return L + (x / maxX) * (W - L - R); };
+    var py = function(y){ return H - B - (y / maxY) * (H - T - B); };
+    var s = '';
+    for (var g = 0; g <= 5; g++){
+      var yv = maxY / 5 * g, yy = py(yv);
+      s += '<line x1="' + L + '" y1="' + yy + '" x2="' + (W - R) + '" y2="' + yy + '" stroke="#2A4534" stroke-width="1"/>';
+      s += '<text x="' + (L - 8) + '" y="' + (yy + 4) + '" fill="#93AC9B" font-size="10" text-anchor="end" font-family="monospace">$' + Math.round(yv / 1000) + 'k</text>';
+    }
+    var step = Math.max(1, Math.round(maxX / 8));
+    for (var x = 0; x <= maxX; x += step){
+      s += '<text x="' + px(x) + '" y="' + (H - B + 16) + '" fill="#93AC9B" font-size="10" text-anchor="middle" font-family="monospace">' + x + '</text>';
+    }
+    s += '<line x1="' + L + '" y1="' + py(0) + '" x2="' + (W - R) + '" y2="' + py(0) + '" stroke="#2A4534"/>';
+    s += '<line x1="' + L + '" y1="' + T + '" x2="' + L + '" y2="' + py(0) + '" stroke="#2A4534"/>';
+    s += '<polyline fill="none" stroke="#7ED3A8" stroke-width="2" stroke-dasharray="6 4" points="' +
+         px(0) + ',' + py(CF) + ' ' + px(maxX) + ',' + py(CF + cvu * maxX) + '"/>';
+    s += '<polyline fill="none" stroke="#D7EE7B" stroke-width="2.5" points="' +
+         px(0) + ',' + py(0) + ' ' + px(maxX) + ',' + py(precio * maxX) + '"/>';
+    if (pe > 0 && pe <= maxX){
+      s += '<circle cx="' + px(pe) + '" cy="' + py(precio * pe) + '" r="5" fill="#0F1E16" stroke="#E4EFE6" stroke-width="2"/>';
+    }
+    s += '<text x="' + (W - R) + '" y="' + (H - 6) + '" fill="#93AC9B" font-size="10" text-anchor="end" font-family="monospace">UNIDADES VENDIDAS EN EL MES</text>';
+    s += '<rect x="' + L + '" y="' + (H - 14) + '" width="14" height="3" fill="#D7EE7B"/><text x="' + (L + 20) + '" y="' + (H - 8) + '" fill="#93AC9B" font-size="10">Ingresos</text>';
+    s += '<rect x="' + (L + 78) + '" y="' + (H - 14) + '" width="14" height="3" fill="#7ED3A8"/><text x="' + (L + 98) + '" y="' + (H - 8) + '" fill="#93AC9B" font-size="10">Costo total</text>';
+    el('chart').innerHTML = s;
+  }
+
+  function update(){
+    var u = +el('s1').value, h = +el('s2').value, vh = +el('s3').value,
+        mat = +el('s4').value, precio = +el('s5').value;
+    el('l1').textContent = u + ' u';
+    el('l2').textContent = h + ' h';
+    el('l3').textContent = f(vh);
+    el('l4').textContent = f(mat);
+    el('l5').textContent = f(precio);
+
+    var cvu = mat + h * vh;
+    var ct = cvu * u + CF;
+    var ctu = ct / u;
+    var gan = precio - ctu;
+    var cm = precio - cvu;
+    var pe = cm > 0 ? CF / cm : Infinity;
+    var util = precio * u - ct;
+
+    el('o1').textContent = f(ctu, 2);
+    el('o2').textContent = f(gan, 2);
+    el('o2b').textContent = (gan / ctu * 100).toFixed(2).replace('.', ',') + ' % sobre el costo';
+    if (isFinite(pe)){
+      el('o3').textContent = Math.ceil(pe) + ' unidades';
+      el('o3b').textContent = Math.round(Math.ceil(pe) / u * 100) + ' % de la producción';
+    } else {
+      el('o3').textContent = 'No se alcanza';
+      el('o3b').textContent = 'El precio no cubre el costo variable';
+    }
+    el('o4').textContent = f(util, 0);
+    draw(u, cvu, precio, pe);
+  }
+
+  ['s1','s2','s3','s4','s5'].forEach(function(id){
+    el(id).addEventListener('input', update);
+  });
+  el('reset').addEventListener('click', function(){
+    for (var k in DEF){ el(k).value = DEF[k]; }
+    update();
+  });
+  update();
+})();
+</script>
+</body>
+</html>
